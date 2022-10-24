@@ -101,6 +101,13 @@ class GameGrid(private val grid: MutableList<MutableList<TicTacToeSymbols>>){
         }
         return false
     }
+
+    fun isCellEmpty(row: Int, column: Int): Boolean {
+        return grid[row][column] == TicTacToeSymbols.EMPTY_CELL
+    }
+    fun addPlayerMove(row: Int, column: Int, ticTacToeSymbol: TicTacToeSymbols) {
+        grid[row][column] = ticTacToeSymbol
+    }
 }
 
 fun main() {
@@ -110,10 +117,29 @@ fun main() {
         val grid = makeGrid(listOfTicTacToeSymbols)
         val gameGrid = GameGrid(grid)
         gameGrid.displayGrid()
-        println(gameGrid.currentGameState.getOutputString())
+        // println(gameGrid.currentGameState.getOutputString())
+        userMakeMove(gameGrid, TicTacToeSymbols.X_MARK)
+        gameGrid.displayGrid()
     }
 
 }
+
+fun userMakeMove(gameGrid: GameGrid, userSide: TicTacToeSymbols) {
+    var userMadeAMove = false
+    while (!userMadeAMove) {
+        val userInputForMove = readln()
+        if (isUserInputForMoveValid(userInputForMove)){
+            val moveCoords = getCoordinatesFromString(userInputForMove)
+            val row = moveCoords[0]
+            val column = moveCoords[1]
+            if (gameGrid.isCellEmpty(row, column)) {
+                gameGrid.addPlayerMove(row, column, userSide)
+                userMadeAMove = true
+            } else println("This cell is occupied! Choose another one!")
+        }
+    }
+}
+
 
 fun isInputStringValid(inputString: String): Boolean {
     if (inputString.count() == 9) {
@@ -164,4 +190,30 @@ fun makeGrid(inputList: MutableList<TicTacToeSymbols>): MutableList<MutableList<
         grid.add(row)
     }
     return grid
+}
+
+fun isUserInputForMoveValid(inputStringForMove: String): Boolean {
+    val trimmedString = inputStringForMove.trimIndent()
+    return if (trimmedString.length == 3) {
+        val row = trimmedString.toCharArray()[0]
+        val column = trimmedString.toCharArray()[2]
+        if (row.isDigit() && column.isDigit()) {
+            if (row.digitToInt() in 1..3 && column.digitToInt() in 1..3) {
+                true
+            } else {
+                println("Coordinates should be from 1 to 3!")
+                false
+            }
+        } else {
+            println("You should enter numbers!")
+            false
+        }
+    } else false
+}
+
+fun getCoordinatesFromString(inputString: String): List<Int> {
+    val trimmedString = inputString.trimIndent()
+    val row = trimmedString.toCharArray()[0].digitToInt() - 1
+    val column = trimmedString.toCharArray()[2].digitToInt() - 1
+    return listOf(row, column)
 }
